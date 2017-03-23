@@ -14,7 +14,7 @@
   "license": "Apache-2.0",
   "autoload": {
     "psr-4": {
-      "Rhubarb\\Leaf\\Harness": "src/",
+      "Rhubarb\\Leaf\\Harness\\": "src/",
       "Rhubarb\\Leaf\\Harness\\Tests\\": "tests/unit/"
     }
   },
