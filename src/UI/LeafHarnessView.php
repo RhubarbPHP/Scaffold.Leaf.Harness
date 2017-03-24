@@ -2,6 +2,7 @@
 
 namespace Rhubarb\Leaf\Harness\UI;
 
+use Rhubarb\Leaf\Controls\Common\Buttons\Button;
 use Rhubarb\Leaf\Controls\Common\SelectionControls\DropDown\DropDown;
 use Rhubarb\Leaf\Leaves\Leaf;
 use Rhubarb\Leaf\Leaves\LeafDeploymentPackage;
@@ -63,9 +64,35 @@ class LeafHarnessView extends View
         return "LeafHarnessViewBridge";
     }
 
+    private $constructorLeaves = [];
+    private $modelLeaves = [];
+
+    private $button;
+
     protected function createSubLeaves()
     {
+        $this->constructorLeaves = [];
+        $this->modelLeaves = [];
+
         parent::createSubLeaves();
+
+        if ($this->model->leafClass){
+            foreach($this->model->constructorProperties as $property){
+                $controlLeaf = $property->makeEditingLeaf();
+                $controlLeaf->setName("const_".$controlLeaf->getName());
+
+                $this->constructorLeaves[] = $controlLeaf;
+                $this->registerSubLeaf($controlLeaf);
+            }
+
+            foreach($this->model->modelProperties as $property){
+                $controlLeaf = $property->makeEditingLeaf();
+                $controlLeaf->setName("model_".$controlLeaf->getName());
+
+                $this->modelLeaves[] = $controlLeaf;
+                $this->registerSubLeaf($controlLeaf);
+            }
+        }
 
         if ($this->model->leafUnderTest) {
             $this->registerSubLeaf($this->model->leafUnderTest);
@@ -80,6 +107,8 @@ class LeafHarnessView extends View
 
             $this->registerSubLeaf($selection);
         }
+
+        $this->registerSubLeaf($this->button = new Button("Update", "Update"));
     }
 
 
@@ -89,11 +118,30 @@ class LeafHarnessView extends View
             ?>
             <div>
                 <h3>Constructor Arguments</h3>
+                <?php
+
+                $this->layoutItemsWithContainer("",
+                    $this->constructorLeaves
+                );
+
+                ?>
+                <h3>Model Properties</h3>
+                <?php
+
+                $this->layoutItemsWithContainer("",
+                    $this->modelLeaves
+                );
+
+                print $this->button;
+
+                ?>
             </div>
             <div>
             <?php
             if ($this->model->leafUnderTest) {
                 print $this->model->leafUnderTest;
+            } else {
+                print "<p>The leaf can't be constructed yet as constructor arguments are missing.</p>";
             }
             ?>
             </div>
